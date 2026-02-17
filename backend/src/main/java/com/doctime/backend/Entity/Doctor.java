@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+
+
 @Entity
 @Table(name = "doctors")
 @Data
@@ -25,11 +27,80 @@ public class Doctor {
     @Column(nullable = false)
     private String hospitalName; // or Clinic Name
 
-    // Crucial for your Smart Queue Algorithm
-    // We store this in "Minutes" (e.g., 15, 20, 30)
     @Column(name = "avg_consultation_time")
     private Integer averageConsultationTime = 15;
 
     // To mark if the doctor is currently in the clinic
     private boolean isAvailable = true;
+
+    // Add this to BOTH Patient.java and Doctor.java
+    @Column(nullable = false)
+    private String password;
+    // Add this right under private String name;
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSpecialization() {
+        return specialization;
+    }
+
+    public void setSpecialization(String specialization) {
+        this.specialization = specialization;
+    }
+
+    public String getHospitalName() {
+        return hospitalName;
+    }
+
+    public void setHospitalName(String hospitalName) {
+        this.hospitalName = hospitalName;
+    }
+
+    public Integer getAverageConsultationTime() {
+        return averageConsultationTime;
+    }
+
+    public void setAverageConsultationTime(Integer averageConsultationTime) {
+        this.averageConsultationTime = averageConsultationTime;
+    }
+
+    public boolean isAvailable() {
+        return isAvailable;
+    }
+
+    public void setAvailable(boolean available) {
+        isAvailable = available;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }
