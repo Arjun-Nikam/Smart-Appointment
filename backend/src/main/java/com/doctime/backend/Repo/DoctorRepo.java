@@ -5,13 +5,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DoctorRepo extends JpaRepository<Doctor, Long> {
 
-    // "Get me all Cardiologists"
-    List<Doctor> findBySpecialization(String specialization);
+    // For Doctor Login
+    Optional<Doctor> findByEmail(String email);
 
-    // "Get me all doctors belonging to Apollo Hospital"
-    List<Doctor> findByHospitalName(String hospitalName);
+    // For Patient Search: Find doctors by exactly matching the specialty
+    List<Doctor> findBySpecializationIgnoreCase(String specialization);
+
+    // For Patient Search: If they type "sha", it finds "Dr. Sharma"
+    List<Doctor> findByNameContainingIgnoreCase(String name);
 }
