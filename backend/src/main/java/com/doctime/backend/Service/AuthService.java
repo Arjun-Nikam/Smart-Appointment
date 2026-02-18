@@ -52,31 +52,34 @@ public class AuthService {
     }
 
     // ==========================================
-    // 3. SECURE LOGIN
+    // 3. SMART UNIVERSAL LOGIN (No Role Needed!)
     // ==========================================
+    public AuthResponse login(String email, String rawPassword) {
 
-    public AuthResponse login(String email, String rawPassword, String role) {
-
-        if (role.equalsIgnoreCase("PATIENT")) {
-            Optional<Patient> patient = patientRepo.findByEmail(email);
-            if (patient.isPresent() && passwordEncoder.matches(rawPassword, patient.get().getPassword())) {
-
-                // Passwords match! Generate the JWT Token.
+        // 1. Check the Patient Table first (since 99% of users are patients)
+        Optional<Patient> patient = patientRepo.findByEmail(email);
+        if (patient.isPresent()) {
+            if (passwordEncoder.matches(rawPassword, patient.get().getPassword())) {
                 String token = jwtUtil.generateToken(email, "PATIENT", patient.get().getId());
                 return new AuthResponse(token, "PATIENT", patient.get());
+            } else {
+                throw new RuntimeException("Invalid Password!");
             }
         }
-        else if (role.equalsIgnoreCase("DOCTOR")) {
-            Optional<Doctor> doctor = doctorRepo.findByEmail(email);
-            if (doctor.isPresent() && passwordEncoder.matches(rawPassword, doctor.get().getPassword())) {
 
-                // Passwords match! Generate the JWT Token.
+        // 2. If not a Patient, check the Doctor Table
+        Optional<Doctor> doctor = doctorRepo.findByEmail(email);
+        if (doctor.isPresent()) {
+            if (passwordEncoder.matches(rawPassword, doctor.get().getPassword())) {
                 String token = jwtUtil.generateToken(email, "DOCTOR", doctor.get().getId());
                 return new AuthResponse(token, "DOCTOR", doctor.get());
+            } else {
+                throw new RuntimeException("Invalid Password!");
             }
         }
 
-        throw new RuntimeException("Invalid Email or Password!");
+        // 3. If email is in neither table
+        throw new RuntimeException("User not found with this email!");
     }
 
 
