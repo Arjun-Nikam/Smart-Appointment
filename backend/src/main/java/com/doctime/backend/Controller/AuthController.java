@@ -42,9 +42,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam String email, @RequestParam String password, @RequestParam String role) {
+    public ResponseEntity<?> login(@RequestParam String email, @RequestParam String password) {
         try {
-            Object user = authService.login(email, password, role);
+            Object user = authService.login(email, password);
             return ResponseEntity.ok(user);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());

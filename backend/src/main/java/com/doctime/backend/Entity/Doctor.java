@@ -1,10 +1,7 @@
 package com.doctime.backend.Entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-
+import lombok.*;
 
 
 @Entity
@@ -14,10 +11,13 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class Doctor {
 
+    @Setter
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Getter
     @Column(nullable = false)
     private String name;
 
@@ -40,17 +40,8 @@ public class Doctor {
     @Column(nullable = false, unique = true)
     private String email;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
+    private Double latitude;
+    private Double longitude;
 
     public void setName(String name) {
         this.name = name;

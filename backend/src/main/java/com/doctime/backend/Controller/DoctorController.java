@@ -34,4 +34,21 @@ public class DoctorController {
         List<Doctor> doctors = doctorRepo.findByNameContainingIgnoreCase(name);
         return ResponseEntity.ok(doctors);
     }
+
+    // 4. Get all Categories (For the frontend to build the UI sections)
+    @GetMapping("/categories")
+    public ResponseEntity<List<String>> getCategories() {
+        List<String> categories = doctorRepo.findAllSpecializations();
+        return ResponseEntity.ok(categories);
+    }
+
+    // 5. Find Closest Doctors (The GPS feature)
+    @GetMapping("/nearby")
+    public ResponseEntity<List<Doctor>> getNearbyDoctors(
+            @RequestParam double lat,
+            @RequestParam double lng) {
+
+        List<Doctor> nearestDoctors = doctorRepo.findNearbyDoctors(lat, lng);
+        return ResponseEntity.ok(nearestDoctors);
+    }
 }
