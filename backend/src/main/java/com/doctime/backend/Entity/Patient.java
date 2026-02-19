@@ -1,5 +1,6 @@
 package com.doctime.backend.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,7 @@ public class Patient {
 
     private String gender;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 

@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class AppointmentService {
@@ -56,9 +58,17 @@ public class AppointmentService {
         newAppointment.setAppointmentTime(newSlotTime);
         newAppointment.setStatus("BOOKED");
 
-        // (Optional: You can calculate queue position here by counting the list size)
+        List<String> activeStatuses = Arrays.asList("BOOKED", "CHECKED_IN", "IN_PROGRESS");
+        Long currentQueueSize = appointmentRepo.countByDoctorIdAndStatusIn(doctorId, activeStatuses);
 
+        newAppointment.setQueuePosition(currentQueueSize.intValue() + 1);
         // 4. Save to Database
         return appointmentRepo.save(newAppointment);
     }
+
+    public List<Appointment> getPatientHistory(Long patientId) {
+        return appointmentRepo.findByPatientId(patientId);
+    }
+
+
 }
