@@ -1,12 +1,15 @@
 package com.doctime.backend.Controller;
 
 import com.doctime.backend.Entity.Appointment;
+import com.doctime.backend.Entity.Doctor;
+import com.doctime.backend.Repo.DoctorRepo;
 import com.doctime.backend.Service.QueueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -14,31 +17,49 @@ import java.util.List;
 public class QueueController {
 
     @Autowired
-    private QueueService queueService; // Using the Service now!
+    private QueueService queueService;
+
+    @Autowired
+    private DoctorRepo doctorRepo; // 👈 We need this to look up the logged-in doctor
 
     // 1. Receptionist iPad: View the live line of patients
-    @GetMapping("/{doctorId}")
-    public ResponseEntity<List<Appointment>> getLiveQueue(@PathVariable Long doctorId) {
-        return ResponseEntity.ok(queueService.getLiveQueue(doctorId));
+    @PreAuthorize("hasRole('DOCTOR')")
+    @GetMapping("/my-queue") // 👈 NO MORE ID IN THE URL.
+    public ResponseEntity<List<Appointment>> getLiveQueue(Principal principal) {
+
+        // Extract the doctor's email from their secure JWT token
+        String email = principal.getName();
+
+        // Find the doctor in the DB
+        Doctor doctor = doctorRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+
+        // Force the service to use the token's ID, not an ID from the URL
+        return ResponseEntity.ok(queueService.getLiveQueue(doctor.getId()));
     }
 
     // 2. Receptionist iPad: Click "Check In" when patient walks through the door
+    @PreAuthorize("hasRole('DOCTOR')")
     @PutMapping("/checkin/{appointmentId}")
-    public ResponseEntity<?> markPatientArrived(@PathVariable Long appointmentId) {
+    public ResponseEntity<?> markPatientArrived(@PathVariable Long appointmentId, Principal principal) {
         try {
-            Appointment updatedAppt = queueService.markPatientArrived(appointmentId);
+            // Get the secure email from the token and pass it to the service
+            String doctorEmail = principal.getName();
+            Appointment updatedAppt = queueService.markPatientArrived(appointmentId, doctorEmail);
             return ResponseEntity.ok(updatedAppt);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    // 3. Doctor iPad: Click "Done" when the consultation is finished
+    // 3. Doctor iPad: Click "Done"
     @PreAuthorize("hasRole('DOCTOR')")
     @PutMapping("/complete/{appointmentId}")
-    public ResponseEntity<?> completeAppointment(@PathVariable Long appointmentId) {
+    public ResponseEntity<?> completeAppointment(@PathVariable Long appointmentId, Principal principal) {
         try {
-            Appointment completedAppt = queueService.completeAppointment(appointmentId);
+            // Get the secure email from the token and pass it to the service
+            String doctorEmail = principal.getName();
+            Appointment completedAppt = queueService.completeAppointment(appointmentId, doctorEmail);
             return ResponseEntity.ok(completedAppt);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

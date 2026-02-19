@@ -35,7 +35,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/doctors/all", "/api/doctors/specialty/**").permitAll()
+                        .requestMatchers("/api/dashboard/**").permitAll()
 
                         // Example of restricting a route to ONLY doctors:
                         // .requestMatchers("/api/queue/**").hasRole("DOCTOR")

@@ -3,6 +3,9 @@ package com.doctime.backend.Entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.time.LocalTime;
 
 
 @Entity
@@ -44,6 +47,40 @@ public class Doctor {
 
     private Double latitude;
     private Double longitude;
+
+    private LocalTime shiftStart;
+
+    // The time they leave the hospital (e.g., 17:00)
+    private LocalTime shiftEnd;
+
+    @ElementCollection
+    @CollectionTable(name = "doctor_shifts", joinColumns = @JoinColumn(name = "doctor_id"))
+    private List<Shift> shifts = new ArrayList<>();
+
+
+    public List<Shift> getShifts() {
+        return shifts;
+    }
+
+    public void setShifts(List<Shift> shifts) {
+        this.shifts = shifts;
+    }
+
+    public LocalTime getShiftStart() {
+        return shiftStart;
+    }
+
+    public void setShiftStart(LocalTime shiftStart) {
+        this.shiftStart = shiftStart;
+    }
+
+    public LocalTime getShiftEnd() {
+        return shiftEnd;
+    }
+
+    public void setShiftEnd(LocalTime shiftEnd) {
+        this.shiftEnd = shiftEnd;
+    }
 
     public Long getId() {
         return id;
