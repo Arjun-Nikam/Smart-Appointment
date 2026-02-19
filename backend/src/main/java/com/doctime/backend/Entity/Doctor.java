@@ -1,5 +1,6 @@
 package com.doctime.backend.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,7 +34,8 @@ public class Doctor {
     // To mark if the doctor is currently in the clinic
     private boolean isAvailable = true;
 
-    // Add this to BOTH Patient.java and Doctor.java
+
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
     // Add this right under private String name;
@@ -42,6 +44,34 @@ public class Doctor {
 
     private Double latitude;
     private Double longitude;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
 
     public void setName(String name) {
         this.name = name;

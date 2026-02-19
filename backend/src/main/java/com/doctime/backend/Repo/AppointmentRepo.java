@@ -31,4 +31,7 @@ public interface AppointmentRepo extends JpaRepository<Appointment, Long> {
             "     ELSE 3 END, " +                           // Late/Future patients LAST
             "a.appointmentTime ASC")                        // Tie-breaker: Who was scheduled first?
     List<Appointment> getLiveQueue(Long doctorId);
+
+    Long countByDoctorIdAndStatusIn(Long doctorId, List<String> statuses);
+
 }

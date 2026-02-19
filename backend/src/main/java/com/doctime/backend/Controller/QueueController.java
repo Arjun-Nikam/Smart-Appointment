@@ -1,10 +1,12 @@
 package com.doctime.backend.Controller;
 
 import com.doctime.backend.Entity.Appointment;
-import com.doctime.backend.Repo.AppointmentRepo;
+import com.doctime.backend.Service.QueueService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import java.time.LocalDateTime;
+
 import java.util.List;
 
 @RestController
@@ -12,31 +14,34 @@ import java.util.List;
 public class QueueController {
 
     @Autowired
-    private AppointmentRepo appointmentRepo;
+    private QueueService queueService; // Using the Service now!
 
-    // 1. Get the Live Queue for the Doctor
+    // 1. Receptionist iPad: View the live line of patients
     @GetMapping("/{doctorId}")
-    public List<Appointment> getLiveQueue(@PathVariable Long doctorId) {
-        // CORRECTED: Name matches the Repo interface now
-        return appointmentRepo.getLiveQueue(doctorId);
+    public ResponseEntity<List<Appointment>> getLiveQueue(@PathVariable Long doctorId) {
+        return ResponseEntity.ok(queueService.getLiveQueue(doctorId));
     }
 
-    // 2. Mark Patient Arrived
+    // 2. Receptionist iPad: Click "Check In" when patient walks through the door
     @PutMapping("/checkin/{appointmentId}")
-    public Appointment markPatientArrived(@PathVariable Long appointmentId) {
-        Appointment appt = appointmentRepo.findById(appointmentId)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
-        appt.setStatus("CHECKED_IN");
-        appt.setActualArrivalTime(LocalDateTime.now());
-        return appointmentRepo.save(appt);
+    public ResponseEntity<?> markPatientArrived(@PathVariable Long appointmentId) {
+        try {
+            Appointment updatedAppt = queueService.markPatientArrived(appointmentId);
+            return ResponseEntity.ok(updatedAppt);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    // 3. Complete Appointment
+    // 3. Doctor iPad: Click "Done" when the consultation is finished
+    @PreAuthorize("hasRole('DOCTOR')")
     @PutMapping("/complete/{appointmentId}")
-    public Appointment completeAppointment(@PathVariable Long appointmentId) {
-        Appointment appt = appointmentRepo.findById(appointmentId)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
-        appt.setStatus("COMPLETED");
-        return appointmentRepo.save(appt);
+    public ResponseEntity<?> completeAppointment(@PathVariable Long appointmentId) {
+        try {
+            Appointment completedAppt = queueService.completeAppointment(appointmentId);
+            return ResponseEntity.ok(completedAppt);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
