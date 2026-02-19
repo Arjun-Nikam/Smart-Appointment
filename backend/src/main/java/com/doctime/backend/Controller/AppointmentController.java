@@ -2,11 +2,15 @@ package com.doctime.backend.Controller;
 
 import com.doctime.backend.Dto.AppointmentRequest;
 import com.doctime.backend.Entity.Appointment;
+import com.doctime.backend.Entity.Patient;
+import com.doctime.backend.Repo.PatientRepo;
 import com.doctime.backend.Service.AppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -15,26 +19,50 @@ public class AppointmentController {
 
     @Autowired
     private AppointmentService appointmentService;
+    @Autowired
+    private PatientRepo patientRepo;
 
+    @PreAuthorize("hasRole('PATIENT')")
     @PostMapping("/book")
-    public ResponseEntity<?> bookAppointment(@RequestBody AppointmentRequest request) {
+    public ResponseEntity<?> bookAppointment(@RequestBody AppointmentRequest request, Principal principal) {
         try {
-            // We pull the IDs out of the JSON request object and pass them to your Service
+            // 1. Get the securely verified email from the JWT Token
+            String userEmail = principal.getName();
+
+            // 2. Look up the patient in the database using that exact email
+            Patient loggedInPatient = patientRepo.findByEmail(userEmail)
+                    .orElseThrow(() -> new RuntimeException("Patient profile not found for this token."));
+
+            // 3. Pass the secure ID to your service, NOT the one from the JSON body
             Appointment savedAppointment = appointmentService.bookAppointment(
-                    request.getPatientId(),
+                    loggedInPatient.getId(),
                     request.getDoctorId()
             );
+
             return ResponseEntity.ok(savedAppointment);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
+    @PreAuthorize("hasRole('PATIENT')")
     @GetMapping("/patient/{patientId}")
     public ResponseEntity<?> getPatientHistory(@PathVariable Long patientId) {
         try {
             List<Appointment> history = appointmentService.getPatientHistory(patientId);
             return ResponseEntity.ok(history);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasRole('PATIENT')")
+    @PutMapping("/cancel/{appointmentId}")
+    public ResponseEntity<?> cancelAppointment(@PathVariable Long appointmentId, Principal principal) {
+        try {
+            String patientEmail = principal.getName(); // Secure identity from token
+            Appointment cancelledAppt = appointmentService.cancelAppointment(appointmentId, patientEmail);
+            return ResponseEntity.ok(cancelledAppt);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

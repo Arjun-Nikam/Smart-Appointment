@@ -3,6 +3,7 @@ package com.doctime.backend.Service;
 import com.doctime.backend.Entity.Appointment;
 import com.doctime.backend.Entity.Doctor;
 import com.doctime.backend.Entity.Patient;
+import com.doctime.backend.Entity.Shift;
 import com.doctime.backend.Repo.AppointmentRepo;
 import com.doctime.backend.Repo.DoctorRepo;
 import com.doctime.backend.Repo.PatientRepo;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,6 +30,7 @@ public class AppointmentService {
     // This is the main method called when someone clicks "Book Now"
     public Appointment bookAppointment(Long patientId, Long doctorId) {
 
+
         // 1. Fetch the Patient and Doctor from the DB
         // (Throw an error if they don't exist)
         Patient patient = patientRepo.findById(patientId)
@@ -35,6 +38,27 @@ public class AppointmentService {
 
         Doctor doctor = doctorRepo.findById(doctorId)
                 .orElseThrow(() -> new RuntimeException("Doctor not found!"));
+
+        //  Is the doctor actually taking patients?
+        if (!doctor.isAvailable()) {
+            throw new RuntimeException("Sorry! " + doctor.getName() + " is currently offline and not taking appointments.");
+        }
+//        Is the current time outside of their shift hours?
+        LocalTime now = LocalTime.now();
+        boolean isWithinShift = false;
+        if (doctor.getShifts() != null && !doctor.getShifts().isEmpty()) {
+            for (Shift shift : doctor.getShifts()) {
+                // If 'now' is AFTER the start time AND BEFORE the end time
+                if (!now.isBefore(shift.getStartTime()) && !now.isAfter(shift.getEndTime())) {
+                    isWithinShift = true;
+                    break; // We found a valid shift, stop checking!
+                }
+            }
+
+            if (!isWithinShift) {
+                throw new RuntimeException("Sorry! " + doctor.getName() + " is currently outside of their working shifts.");
+            }
+        }
 
         // 2. Calculate the Appointment Time
         // We ask the Repo: "When is this doctor free next?"
@@ -69,6 +93,25 @@ public class AppointmentService {
     public List<Appointment> getPatientHistory(Long patientId) {
         return appointmentRepo.findByPatientId(patientId);
     }
+
+    public Appointment cancelAppointment(Long appointmentId, String loggedInPatientEmail) {
+        Appointment appt = appointmentRepo.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        // 🛑 SECURITY CHECK: Does this appointment belong to the patient trying to cancel it?
+        if (!appt.getPatient().getEmail().equals(loggedInPatientEmail)) {
+            throw new RuntimeException("Unauthorized: You can only cancel your own appointments!");
+        }
+
+        // Only allow cancellation if it's still BOOKED (can't cancel if already completed)
+        if (!appt.getStatus().equals("BOOKED")) {
+            throw new RuntimeException("Cannot cancel an appointment that is already " + appt.getStatus());
+        }
+
+        appt.setStatus("CANCELLED");
+        return appointmentRepo.save(appt);
+    }
+
 
 
 }

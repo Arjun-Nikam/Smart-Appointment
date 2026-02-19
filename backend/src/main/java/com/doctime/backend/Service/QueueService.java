@@ -14,15 +14,20 @@ public class QueueService {
     @Autowired
     private AppointmentRepo appointmentRepo;
 
-    // 1. Get the Live Queue for the Doctor
+    // 1. Get the Live Queue
     public List<Appointment> getLiveQueue(Long doctorId) {
         return appointmentRepo.getLiveQueue(doctorId);
     }
 
-    // 2. Mark Patient Arrived
-    public Appointment markPatientArrived(Long appointmentId) {
+    // 2. Mark Patient Arrived (SECURED)
+    public Appointment markPatientArrived(Long appointmentId, String loggedInDoctorEmail) {
         Appointment appt = appointmentRepo.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        // 🛑 SECURITY CHECK: Does this appointment belong to the logged-in doctor?
+        if (!appt.getDoctor().getEmail().equals(loggedInDoctorEmail)) {
+            throw new RuntimeException("Unauthorized: You cannot modify another doctor's queue!");
+        }
 
         appt.setStatus("CHECKED_IN");
         appt.setActualArrivalTime(LocalDateTime.now());
@@ -30,10 +35,15 @@ public class QueueService {
         return appointmentRepo.save(appt);
     }
 
-    // 3. Complete Appointment
-    public Appointment completeAppointment(Long appointmentId) {
+    // 3. Complete Appointment (SECURED)
+    public Appointment completeAppointment(Long appointmentId, String loggedInDoctorEmail) {
         Appointment appt = appointmentRepo.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        // 🛑 SECURITY CHECK: Does this appointment belong to the logged-in doctor?
+        if (!appt.getDoctor().getEmail().equals(loggedInDoctorEmail)) {
+            throw new RuntimeException("Unauthorized: You cannot modify another doctor's queue!");
+        }
 
         appt.setStatus("COMPLETED");
 
