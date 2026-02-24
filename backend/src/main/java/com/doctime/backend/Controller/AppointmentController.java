@@ -66,4 +66,21 @@ public class AppointmentController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    // 3. Patient App: View all upcoming and past appointments
+    @PreAuthorize("hasRole('PATIENT')")
+    @GetMapping("/my-history")
+    public ResponseEntity<?> getMyHistory(Principal principal) {
+        try {
+            // Extract the secure email from the JWT Token
+            String patientEmail = principal.getName();
+
+            // Fetch the history from the Service
+            List<Appointment> history = appointmentService.getPatientHistory(patientEmail);
+
+            return ResponseEntity.ok(history);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

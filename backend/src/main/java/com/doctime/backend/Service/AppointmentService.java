@@ -139,6 +139,17 @@ public class AppointmentService {
         return appt;
     }
 
+    // 5. Get Patient History (SECURED)
+    public List<Appointment> getPatientHistory(String loggedInPatientEmail) {
+
+        // 1. Find the exact patient in the database using their secure token email
+        Patient patient = patientRepo.findByEmail(loggedInPatientEmail)
+                .orElseThrow(() -> new RuntimeException("Patient profile not found."));
+
+        // 2. Fetch and return their sorted history
+        return appointmentRepo.findByPatientIdOrderByAppointmentTimeDesc(patient.getId());
+    }
+
 
 
 }
