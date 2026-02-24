@@ -67,6 +67,7 @@ public class QueueController {
     }
 
     // 4. Receptionist iPad: Click "No-Show" if patient is too late
+    // 4. Receptionist iPad: Click "No-Show" if patient is too late
     @PreAuthorize("hasRole('DOCTOR')")
     @PutMapping("/noshow/{appointmentId}")
     public ResponseEntity<?> markPatientNoShow(@PathVariable Long appointmentId, Principal principal) {
