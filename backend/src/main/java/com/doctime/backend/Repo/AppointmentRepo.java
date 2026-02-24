@@ -38,4 +38,6 @@ public interface AppointmentRepo extends JpaRepository<Appointment, Long> {
     @Query("SELECT a FROM Appointment a WHERE a.doctor.id = :doctorId AND a.status = 'BOOKED' AND a.appointmentTime > :cancelledTime ORDER BY a.appointmentTime ASC")
     List<Appointment> findUpcomingAppointments(Long doctorId, LocalDateTime cancelledTime);
 
+    // Fetch all appointments for a patient, sorted newest to oldest
+    List<Appointment> findByPatientIdOrderByAppointmentTimeDesc(Long patientId);
 }
