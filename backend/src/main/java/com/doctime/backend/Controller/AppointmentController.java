@@ -5,6 +5,7 @@ import com.doctime.backend.Entity.Appointment;
 import com.doctime.backend.Entity.Patient;
 import com.doctime.backend.Repo.PatientRepo;
 import com.doctime.backend.Service.AppointmentService;
+import com.doctime.backend.Service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,21 +20,19 @@ public class AppointmentController {
 
     @Autowired
     private AppointmentService appointmentService;
+
     @Autowired
-    private PatientRepo patientRepo;
+    private PatientService patientService;
 
     @PreAuthorize("hasRole('PATIENT')")
     @PostMapping("/book")
     public ResponseEntity<?> bookAppointment(@RequestBody AppointmentRequest request, Principal principal) {
         try {
-            // 1. Get the securely verified email from the JWT Token
             String userEmail = principal.getName();
 
-            // 2. Look up the patient in the database using that exact email
-            Patient loggedInPatient = patientRepo.findByEmail(userEmail)
-                    .orElseThrow(() -> new RuntimeException("Patient profile not found for this token."));
+            // 👈 Call the Service instead of the Repo
+            Patient loggedInPatient = patientService.getPatientByEmail(userEmail);
 
-            // 3. Pass the secure ID to your service, NOT the one from the JSON body
             Appointment savedAppointment = appointmentService.bookAppointment(
                     loggedInPatient.getId(),
                     request.getDoctorId()
