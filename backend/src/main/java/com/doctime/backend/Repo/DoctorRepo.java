@@ -31,4 +31,9 @@ public interface DoctorRepo extends JpaRepository<Doctor, Long> {
             "sin(radians(:userLat)) * sin(radians(latitude)))) ASC",
             nativeQuery = true)
     List<Doctor> findNearbyDoctors(@Param("userLat") double userLat, @Param("userLng") double userLng);
+
+    // Search doctors by hospital name (Case-insensitive, partial match)
+    List<Doctor> findByHospitalNameContainingIgnoreCase(String hospitalName);
+
+
 }

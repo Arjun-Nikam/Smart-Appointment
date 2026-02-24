@@ -65,4 +65,18 @@ public class QueueController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    // 4. Receptionist iPad: Click "No-Show" if patient is too late
+    @PreAuthorize("hasRole('DOCTOR')")
+    @PutMapping("/noshow/{appointmentId}")
+    public ResponseEntity<?> markPatientNoShow(@PathVariable Long appointmentId, Principal principal) {
+        try {
+            String doctorEmail = principal.getName();
+            Appointment missedAppt = queueService.markNoShow(appointmentId, doctorEmail);
+            return ResponseEntity.ok(missedAppt);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }

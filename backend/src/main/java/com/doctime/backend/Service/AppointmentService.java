@@ -98,18 +98,45 @@ public class AppointmentService {
         Appointment appt = appointmentRepo.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
-        // 🛑 SECURITY CHECK: Does this appointment belong to the patient trying to cancel it?
         if (!appt.getPatient().getEmail().equals(loggedInPatientEmail)) {
             throw new RuntimeException("Unauthorized: You can only cancel your own appointments!");
         }
 
-        // Only allow cancellation if it's still BOOKED (can't cancel if already completed)
         if (!appt.getStatus().equals("BOOKED")) {
             throw new RuntimeException("Cannot cancel an appointment that is already " + appt.getStatus());
         }
 
+        // 1. Mark the current one as cancelled
         appt.setStatus("CANCELLED");
-        return appointmentRepo.save(appt);
+        appointmentRepo.save(appt);
+
+        // --- THE CASCADING QUEUE UPDATE ---
+
+        // 2. Find everyone waiting behind this cancelled patient
+        List<Appointment> upcomingAppts = appointmentRepo.findUpcomingAppointments(
+                appt.getDoctor().getId(),
+                appt.getAppointmentTime()
+        );
+
+        // 3. How much time do we need to shift them by?
+        long minutesToMove = appt.getDoctor().getAverageConsultationTime();
+
+        // 4. Loop through and move everyone forward!
+        for (Appointment upcoming : upcomingAppts) {
+
+            // Shift the clock forward (subtract the minutes)
+            upcoming.setAppointmentTime(upcoming.getAppointmentTime().minusMinutes(minutesToMove));
+
+            // Shift the queue line forward (subtract 1)
+            if (upcoming.getQueuePosition() != null && upcoming.getQueuePosition() > 1) {
+                upcoming.setQueuePosition(upcoming.getQueuePosition() - 1);
+            }
+        }
+
+        // 5. Save the entire updated list back to the database in one batch
+        appointmentRepo.saveAll(upcomingAppts);
+
+        return appt;
     }
 
 

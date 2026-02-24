@@ -34,4 +34,8 @@ public interface AppointmentRepo extends JpaRepository<Appointment, Long> {
 
     Long countByDoctorIdAndStatusIn(Long doctorId, List<String> statuses);
 
+    // Find all booked appointments for a doctor that happen AFTER a specific time
+    @Query("SELECT a FROM Appointment a WHERE a.doctor.id = :doctorId AND a.status = 'BOOKED' AND a.appointmentTime > :cancelledTime ORDER BY a.appointmentTime ASC")
+    List<Appointment> findUpcomingAppointments(Long doctorId, LocalDateTime cancelledTime);
+
 }

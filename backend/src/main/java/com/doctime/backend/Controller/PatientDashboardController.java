@@ -1,7 +1,7 @@
 package com.doctime.backend.Controller;
 
 import com.doctime.backend.Entity.Doctor;
-import com.doctime.backend.Repo.DoctorRepo;
+import com.doctime.backend.Service.DoctorService; // 👈 Import the new Service!
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,46 +9,41 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/dashboard") // All URLs start with this now!
+@RequestMapping("/api/dashboard")
 public class PatientDashboardController {
 
     @Autowired
-    private DoctorRepo doctorRepo;
+    private DoctorService doctorService; // 👈 Inject the Service layer, NOT the Repo!
 
-    // 1. Get ALL doctors (useful for the homepage)
     @GetMapping("/all")
-    public ResponseEntity<List<Doctor>> getAllDoctors() { // Added ResponseEntity!
-        return ResponseEntity.ok(doctorRepo.findAll());
+    public ResponseEntity<List<Doctor>> getAllDoctors() {
+        return ResponseEntity.ok(doctorService.getAllDoctors());
     }
 
-    // 2. Search by Specialty (e.g., /api/dashboard/specialty/Dentist)
     @GetMapping("/specialty/{specialty}")
     public ResponseEntity<List<Doctor>> getDoctorsBySpecialty(@PathVariable String specialty) {
-        List<Doctor> doctors = doctorRepo.findBySpecializationIgnoreCase(specialty);
-        return ResponseEntity.ok(doctors);
+        return ResponseEntity.ok(doctorService.getDoctorsBySpecialty(specialty));
     }
 
-    // 3. Search by Name (e.g., /api/dashboard/search?name=Sharma)
     @GetMapping("/search")
     public ResponseEntity<List<Doctor>> searchDoctorByName(@RequestParam String name) {
-        List<Doctor> doctors = doctorRepo.findByNameContainingIgnoreCase(name);
-        return ResponseEntity.ok(doctors);
+        return ResponseEntity.ok(doctorService.searchDoctorByName(name));
     }
 
-    // 4. Get all Categories (For the frontend to build the UI sections)
     @GetMapping("/categories")
     public ResponseEntity<List<String>> getCategories() {
-        List<String> categories = doctorRepo.findAllSpecializations();
-        return ResponseEntity.ok(categories);
+        return ResponseEntity.ok(doctorService.getAllCategories());
     }
 
-    // 5. Find Closest Doctors (The GPS feature)
     @GetMapping("/nearby")
     public ResponseEntity<List<Doctor>> getNearbyDoctors(
             @RequestParam double lat,
             @RequestParam double lng) {
+        return ResponseEntity.ok(doctorService.getNearbyDoctors(lat, lng));
+    }
 
-        List<Doctor> nearestDoctors = doctorRepo.findNearbyDoctors(lat, lng);
-        return ResponseEntity.ok(nearestDoctors);
+    @GetMapping("/hospital")
+    public ResponseEntity<List<Doctor>> searchByHospital(@RequestParam String name) {
+        return ResponseEntity.ok(doctorService.searchByHospitalName(name));
     }
 }
