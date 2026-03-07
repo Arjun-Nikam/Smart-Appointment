@@ -1,10 +1,12 @@
 package com.doctime.backend.Config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,6 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Map;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -22,47 +25,66 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 1. Look for the "Authorization" header
         String authHeader = request.getHeader("Authorization");
-        String token = null;
+
+        // No token present — let SecurityConfig decide if route is public or not
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String token = authHeader.substring(7);
         String email = null;
         String role = null;
 
-        // 2. Check if the header exists and starts with "Bearer "
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7); // Remove "Bearer " to get the pure token
-            try {
-                email = jwtUtil.extractEmail(token);
-                role = jwtUtil.extractRole(token);
-            } catch (Exception e) {
-                System.out.println("Invalid Token!");
-            }
+        try {
+            email = jwtUtil.extractEmail(token);
+            role  = jwtUtil.extractRole(token);
+        } catch (Exception e) {
+            // FIX #4: Return proper 401 JSON response — no more silent console print
+            sendErrorResponse(response, "Invalid or malformed token.");
+            return;
         }
 
-        // 3. If we found an email and they aren't already authenticated on this request...
+        // FIX #5: Explicitly reject expired tokens with a clear response
+        if (!jwtUtil.isTokenValid(token)) {
+            sendErrorResponse(response, "Token has expired. Please log in again.");
+            return;
+        }
+
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            SimpleGrantedAuthority authority =
+                    new SimpleGrantedAuthority("ROLE_" + role);
 
-            // 4. Validate the token hasn't expired
-            if (jwtUtil.isTokenValid(token)) {
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(
+                            email, null, Collections.singletonList(authority));
 
-                // 5. Create the "Security Badge" (Authentication Token)
-                // We add "ROLE_" prefix because Spring Security likes it that way
-                SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
+            authToken.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request));
 
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        email, null, Collections.singletonList(authority));
-
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                // 6. Clip the badge to Spring's internal clipboard
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
+            SecurityContextHolder.getContext().setAuthentication(authToken);
         }
 
-        // 7. Let the request continue to the Controller!
         filterChain.doFilter(request, response);
+    }
+
+    // FIX #4 & #5: Clean JSON 401 instead of silent failure or HTML error page
+    private void sendErrorResponse(HttpServletResponse response, String message)
+            throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+        Map<String, String> error = Map.of(
+                "error", "Unauthorized",
+                "message", message
+        );
+
+        new ObjectMapper().writeValue(response.getOutputStream(), error);
     }
 }
