@@ -24,6 +24,10 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
+    // FIX #1: Was used but never injected — compile error
+    @Autowired
+    private TokenBlacklist tokenBlacklist;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -32,7 +36,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
-        // No token present — let SecurityConfig decide if route is public or not
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -40,18 +43,21 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
         String email = null;
-        String role = null;
+        String role  = null;
 
         try {
             email = jwtUtil.extractEmail(token);
             role  = jwtUtil.extractRole(token);
         } catch (Exception e) {
-            // FIX #4: Return proper 401 JSON response — no more silent console print
             sendErrorResponse(response, "Invalid or malformed token.");
             return;
         }
 
-        // FIX #5: Explicitly reject expired tokens with a clear response
+        if (tokenBlacklist.isBlacklisted(token)) {
+            sendErrorResponse(response, "Token has been invalidated. Please log in again.");
+            return;
+        }
+
         if (!jwtUtil.isTokenValid(token)) {
             sendErrorResponse(response, "Token has expired. Please log in again.");
             return;
@@ -74,17 +80,11 @@ public class JwtFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    // FIX #4 & #5: Clean JSON 401 instead of silent failure or HTML error page
     private void sendErrorResponse(HttpServletResponse response, String message)
             throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
-        Map<String, String> error = Map.of(
-                "error", "Unauthorized",
-                "message", message
-        );
-
-        new ObjectMapper().writeValue(response.getOutputStream(), error);
+        new ObjectMapper().writeValue(response.getOutputStream(),
+                Map.of("error", "Unauthorized", "message", message));
     }
 }

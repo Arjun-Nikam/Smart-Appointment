@@ -5,6 +5,7 @@ import com.doctime.backend.Entity.Appointment;
 import com.doctime.backend.Entity.Patient;
 import com.doctime.backend.Service.AppointmentService;
 import com.doctime.backend.Service.PatientService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,7 +27,8 @@ public class AppointmentController {
     @PreAuthorize("hasRole('PATIENT')")
     @PostMapping("/book")
     public ResponseEntity<?> bookAppointment(
-            @RequestBody AppointmentRequest request,
+
+            @Valid @RequestBody AppointmentRequest request,
             Principal principal) {
         try {
             // Identity comes from the JWT token — never trust the request body for this

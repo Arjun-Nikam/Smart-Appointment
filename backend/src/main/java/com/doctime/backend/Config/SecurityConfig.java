@@ -25,6 +25,10 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
+    // FIX #3: Was never injected — compile error
+    @Autowired
+    private RateLimitFilter rateLimitFilter;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -34,14 +38,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-
-                // FIX #7: CORS — only allow your actual frontend domain
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // FIX #8: Security headers — prevent clickjacking, sniffing etc.
                 .headers(headers -> headers
                         .frameOptions(frame -> frame.deny())
                         .contentTypeOptions(content -> {})
@@ -50,31 +49,27 @@ public class SecurityConfig {
                                 .maxAgeInSeconds(31536000)
                         )
                 )
-
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        // FIX #6: Dashboard is protected — remove permitAll()
                         .requestMatchers("/api/dashboard/**").authenticated()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
-
+                // FIX #4: Both lines now correctly INSIDE the method body
+                // RateLimit runs first, then JWT validation
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // FIX #7: CORS config — whitelist only your frontend URL
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-
-        // Replace with your actual frontend URL in production
         config.setAllowedOrigins(List.of(
-                "http://localhost:3000",       // Local dev
-                "https://yourdomain.com"       // Production frontend
+                "http://localhost:3000",
+                "https://yourdomain.com"
         ));
-
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setAllowCredentials(true);
