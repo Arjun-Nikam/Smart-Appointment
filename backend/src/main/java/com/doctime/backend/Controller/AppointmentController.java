@@ -3,7 +3,6 @@ package com.doctime.backend.Controller;
 import com.doctime.backend.Dto.AppointmentRequest;
 import com.doctime.backend.Entity.Appointment;
 import com.doctime.backend.Entity.Patient;
-import com.doctime.backend.Repo.PatientRepo;
 import com.doctime.backend.Service.AppointmentService;
 import com.doctime.backend.Service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,42 +25,37 @@ public class AppointmentController {
 
     @PreAuthorize("hasRole('PATIENT')")
     @PostMapping("/book")
-    public ResponseEntity<?> bookAppointment(@RequestBody AppointmentRequest request, Principal principal) {
+    public ResponseEntity<?> bookAppointment(
+            @RequestBody AppointmentRequest request,
+            Principal principal) {
         try {
+            // Identity comes from the JWT token — never trust the request body for this
             String userEmail = principal.getName();
-
-            // 👈 Call the Service instead of the Repo
             Patient loggedInPatient = patientService.getPatientByEmail(userEmail);
 
-            Appointment savedAppointment = appointmentService.bookAppointment(
+            Appointment saved = appointmentService.bookAppointment(
                     loggedInPatient.getId(),
                     request.getDoctorId()
             );
 
-            return ResponseEntity.ok(savedAppointment);
+            return ResponseEntity.ok(saved);
+
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @PreAuthorize("hasRole('PATIENT')")
-    @GetMapping("/patient/{patientId}")
-    public ResponseEntity<?> getPatientHistory(@PathVariable Long patientId) {
-        try {
-            List<Appointment> history = appointmentService.getPatientHistory(patientId);
-            return ResponseEntity.ok(history);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
 
     @PreAuthorize("hasRole('PATIENT')")
-    @PutMapping("/cancel/{appointmentId}")
-    public ResponseEntity<?> cancelAppointment(@PathVariable Long appointmentId, Principal principal) {
+    @DeleteMapping("/cancel/{appointmentId}")
+    public ResponseEntity<?> cancelAppointment(
+            @PathVariable Long appointmentId,
+            Principal principal) {
         try {
-            String patientEmail = principal.getName(); // Secure identity from token
-            Appointment cancelledAppt = appointmentService.cancelAppointment(appointmentId, patientEmail);
-            return ResponseEntity.ok(cancelledAppt);
+            String patientEmail = principal.getName();
+            Appointment cancelled = appointmentService.cancelAppointment(appointmentId, patientEmail);
+            return ResponseEntity.ok(cancelled);
+
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -72,12 +66,8 @@ public class AppointmentController {
     @GetMapping("/my-history")
     public ResponseEntity<?> getMyHistory(Principal principal) {
         try {
-            // Extract the secure email from the JWT Token
             String patientEmail = principal.getName();
-
-            // Fetch the history from the Service
             List<Appointment> history = appointmentService.getPatientHistory(patientEmail);
-
             return ResponseEntity.ok(history);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

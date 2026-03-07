@@ -8,7 +8,6 @@ public class AppointmentRequest {
     private Long doctorId;
 
 
-
     public Long getDoctorId() {
         return doctorId;
     }
