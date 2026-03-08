@@ -23,7 +23,7 @@ public class Patient {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false, unique = true, length = 10)
     private String phoneNumber;
 
     private String age;
