@@ -9,7 +9,10 @@ import com.doctime.backend.Repo.PatientRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
+
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -30,6 +33,24 @@ public class AuthService {
     // ==========================================
     // 1. PATIENT SIGNUP
     // ==========================================
+
+    // Add these to your existing @Autowired fields
+    @Value("${admin.email}")
+    private String adminEmail;
+
+    @Value("${admin.password}")
+    private String adminPassword;
+
+    // Admin login — credentials come from application.properties / env vars
+    public Map<String, String> loginAdmin(String email, String password) {
+        if (!email.equals(adminEmail) || !password.equals(adminPassword)) {
+            throw new RuntimeException("Invalid credentials.");
+        }
+
+        // Generate a JWT with ADMIN role — valid for 10 hours like others
+        String token = jwtUtil.generateToken(email, "ADMIN", -1L);
+        return Map.of("token", token, "role", "ADMIN");
+    }
     public Patient registerPatient(Patient patient) {
         if (patientRepo.findByEmail(patient.getEmail()).isPresent()) {
             throw new RuntimeException("Patient email is already taken!");

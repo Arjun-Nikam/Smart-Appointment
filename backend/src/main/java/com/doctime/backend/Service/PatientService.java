@@ -13,6 +13,6 @@ public class PatientService {
 
     public Patient getPatientByEmail(String email) {
         return patientRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Patient profile not found."));
+                .orElseThrow(() -> new RuntimeException("Invalid credentials."));
     }
 }

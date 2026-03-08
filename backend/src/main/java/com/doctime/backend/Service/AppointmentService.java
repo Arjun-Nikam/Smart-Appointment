@@ -31,10 +31,10 @@ public class AppointmentService {
 
         // Pessimistic lock — prevents race condition on simultaneous bookings
         Doctor doctor = doctorRepo.findByIdWithLock(doctorId)
-                .orElseThrow(() -> new RuntimeException("Doctor not found!"));
+                .orElseThrow(() -> new RuntimeException("Invalid credentials."));
 
         Patient patient = patientRepo.findById(patientId)
-                .orElseThrow(() -> new RuntimeException("Patient not found!"));
+                .orElseThrow(() -> new RuntimeException("Invalid credentials."));
 
         // 1. Availability check
         if (!doctor.isAvailable()) {
@@ -126,7 +126,7 @@ public class AppointmentService {
 
     public List<Appointment> getPatientHistory(String loggedInPatientEmail) {
         Patient patient = patientRepo.findByEmail(loggedInPatientEmail)
-                .orElseThrow(() -> new RuntimeException("Patient not found."));
+                .orElseThrow(() -> new RuntimeException("Invalid credentials."));
         return appointmentRepo.findByPatientIdOrderByAppointmentTimeDesc(patient.getId());
     }
 }

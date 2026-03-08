@@ -40,7 +40,7 @@ public class DoctorService {
 
     public Doctor updateDoctorSchedule(Long doctorId, ScheduleUpdateRequest request) {
         Doctor doctor = doctorRepo.findById(doctorId)
-                .orElseThrow(() -> new RuntimeException("Doctor not found!"));
+                .orElseThrow(() -> new RuntimeException("Invalid credentials."));
 
         // 1. Update the manual switch
         doctor.setAvailable(request.isAvailable());
