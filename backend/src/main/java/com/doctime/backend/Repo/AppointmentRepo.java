@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AppointmentRepo extends JpaRepository<Appointment, Long> {
@@ -107,7 +108,19 @@ public interface AppointmentRepo extends JpaRepository<Appointment, Long> {
             @Param("minutes") long minutes
     );
 
-    // Count patients ahead of this patient in the queue
+
+
+    // Find patient's active appointment for today automatically
+    @Query("SELECT a FROM Appointment a " +
+            "WHERE a.patient.id = :patientId " +
+            "AND a.status IN ('BOOKED', 'CHECKED_IN') " +
+            "AND CAST(a.appointmentTime AS date) = :today")
+    Optional<Appointment> findActiveAppointmentForPatientToday(
+            @Param("patientId") Long patientId,
+            @Param("today") LocalDate today
+    );
+
+    // Count how many patients are ahead in the queue
     @Query("SELECT COUNT(a) FROM Appointment a " +
             "WHERE a.doctor.id = :doctorId " +
             "AND a.status IN ('BOOKED', 'CHECKED_IN', 'IN_PROGRESS') " +
