@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -20,6 +21,7 @@ public class TokenBlacklist {
     private long expirationMs;
 
     // Called on logout — saves token to DB with its expiry time
+    @Transactional
     public void blacklist(String token) {
         LocalDateTime expiresAt = LocalDateTime.now()
                 .plusSeconds(expirationMs / 1000);
