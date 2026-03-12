@@ -96,7 +96,7 @@ public interface AppointmentRepo extends JpaRepository<Appointment, Long> {
     @Modifying
     @Transactional
     @Query(value = "UPDATE appointments SET " +
-            "appointment_time = appointment_time - INTERVAL :minutes MINUTE, " +
+            "appointment_time = appointment_time - (:minutes * INTERVAL '1 minute'), " +
             "queue_position = queue_position - 1 " +
             "WHERE doctor_id = :doctorId " +
             "AND appointment_time > :afterTime " +
@@ -106,6 +106,20 @@ public interface AppointmentRepo extends JpaRepository<Appointment, Long> {
             @Param("doctorId") Long doctorId,
             @Param("afterTime") LocalDateTime afterTime,
             @Param("minutes") long minutes
+    );
+
+    // Find first CHECKED_IN patient AFTER a given queue position
+// This handles the case where multiple patients are absent
+    @Query("SELECT a FROM Appointment a " +
+            "WHERE a.doctor.id = :doctorId " +
+            "AND a.status = 'CHECKED_IN' " +
+            "AND a.queuePosition > :afterPosition " +
+            "AND CAST(a.appointmentTime AS date) = :today " +
+            "ORDER BY a.queuePosition ASC")
+    Optional<Appointment> findFirstCheckedInAfterPosition(
+            @Param("doctorId") Long doctorId,
+            @Param("afterPosition") int afterPosition,
+            @Param("today") LocalDate today
     );
 
 

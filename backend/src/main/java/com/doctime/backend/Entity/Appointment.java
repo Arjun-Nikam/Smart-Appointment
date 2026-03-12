@@ -46,6 +46,15 @@ public class Appointment {
     // We record exactly when they stepped into the hospital
     private LocalDateTime actualArrivalTime;
 
+    @Column(name = "late_arrival", nullable = false, columnDefinition = "boolean default false")
+    private Boolean lateArrival = false;
+
+//    ----------------------------------------------------------------
+
+
+    public Boolean isLateArrival() { return lateArrival; }
+    public void setLateArrival(Boolean lateArrival) { this.lateArrival = lateArrival; }
+
     public Long getId() {
         return id;
     }

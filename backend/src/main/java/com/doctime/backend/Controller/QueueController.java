@@ -93,4 +93,19 @@ public class QueueController {
         }
     }
 
+    @PreAuthorize("hasRole('DOCTOR')")
+    @PutMapping("/swap/{lateAppointmentId}")
+    public ResponseEntity<?> swapWithNextPresent(
+            @PathVariable Long lateAppointmentId,
+            Principal principal) {
+        try {
+            String doctorEmail = principal.getName();
+            return ResponseEntity.ok(
+                    queueService.swapWithNextPresent(lateAppointmentId, doctorEmail)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }
