@@ -106,4 +106,16 @@ public interface AppointmentRepo extends JpaRepository<Appointment, Long> {
             @Param("afterTime") LocalDateTime afterTime,
             @Param("minutes") long minutes
     );
+
+    // Count patients ahead of this patient in the queue
+    @Query("SELECT COUNT(a) FROM Appointment a " +
+            "WHERE a.doctor.id = :doctorId " +
+            "AND a.status IN ('BOOKED', 'CHECKED_IN', 'IN_PROGRESS') " +
+            "AND a.queuePosition < :myPosition " +
+            "AND CAST(a.appointmentTime AS date) = :today")
+    Long countPatientsAhead(
+            @Param("doctorId") Long doctorId,
+            @Param("myPosition") int myPosition,
+            @Param("today") LocalDate today
+    );
 }

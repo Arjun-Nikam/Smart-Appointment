@@ -68,6 +68,8 @@ public class AuthController {
             doctor.setHospitalName(request.getHospitalName());
             doctor.setAverageConsultationTime(request.getAverageConsultationTime());
             doctor.setPassword(request.getPassword()); // raw — hashed in service
+            doctor.setLatitude(request.getLatitude());
+            doctor.setLongitude(request.getLongitude());
 
             Doctor saved = authService.registerDoctor(doctor);
             return ResponseEntity.ok(saved);

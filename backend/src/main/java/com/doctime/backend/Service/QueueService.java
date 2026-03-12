@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class QueueService {
@@ -86,5 +87,34 @@ public class QueueService {
         appointmentRepo.saveAll(upcomingAppts);
 
         return appt;
+    }
+
+    public Map<String, Object> getPatientQueuePosition(Long appointmentId, String patientEmail) {
+
+        Appointment appt = appointmentRepo.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        // Security check — only the owner can see their position
+        if (!appt.getPatient().getEmail().equals(patientEmail)) {
+            throw new RuntimeException("Unauthorized: This is not your appointment.");
+        }
+
+        // Count how many patients are ahead in the queue
+        long patientsAhead = appointmentRepo.countPatientsAhead(
+                appt.getDoctor().getId(),
+                appt.getQueuePosition(),
+                LocalDate.now()
+        );
+
+        return Map.of(
+                "appointmentId", appt.getId(),
+                "yourQueuePosition", appt.getQueuePosition(),
+                "patientsAhead", patientsAhead,
+                "estimatedWaitMinutes", patientsAhead * appt.getDoctor().getAverageConsultationTime(),
+                "appointmentTime", appt.getAppointmentTime(),
+                "status", appt.getStatus(),
+                "doctorName", appt.getDoctor().getName(),
+                "hospitalName", appt.getDoctor().getHospitalName()
+        );
     }
 }
