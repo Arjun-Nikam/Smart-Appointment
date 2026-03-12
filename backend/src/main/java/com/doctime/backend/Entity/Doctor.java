@@ -51,6 +51,8 @@ public class Doctor {
     @CollectionTable(name = "doctor_shifts", joinColumns = @JoinColumn(name = "doctor_id"))
     private List<Shift> shifts = new ArrayList<>();
 
+
+
     public List<Shift> getShifts() { return shifts; }
     public void setShifts(List<Shift> shifts) { this.shifts = shifts; }
 

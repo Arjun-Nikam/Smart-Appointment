@@ -80,4 +80,18 @@ public class QueueController {
         }
     }
 
+    // Patient App: See your position and how many are ahead of you
+    @PreAuthorize("hasRole('PATIENT')")
+    @GetMapping("/my-position/{appointmentId}")
+    public ResponseEntity<?> getMyQueuePosition(
+            @PathVariable Long appointmentId,
+            Principal principal) {
+        try {
+            String patientEmail = principal.getName();
+            return ResponseEntity.ok(queueService.getPatientQueuePosition(appointmentId, patientEmail));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }
