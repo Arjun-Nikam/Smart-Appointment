@@ -38,14 +38,14 @@ public class DoctorService {
         return doctorRepo.findByHospitalNameContainingIgnoreCase(name);
     }
 
-    public Doctor updateDoctorSchedule(Long doctorId, ScheduleUpdateRequest request) {
-        Doctor doctor = doctorRepo.findById(doctorId)
+    // FIX #5: Takes email from token — not doctorId from URL
+    // Doctor can only ever update their own schedule
+    public Doctor updateDoctorSchedule(String doctorEmail, ScheduleUpdateRequest request) {
+        Doctor doctor = doctorRepo.findByEmail(doctorEmail)
                 .orElseThrow(() -> new RuntimeException("Invalid credentials."));
 
-        // 1. Update the manual switch
         doctor.setAvailable(request.isAvailable());
 
-        // 2. Clear old shifts and save the new ones
         if (request.getShifts() != null) {
             doctor.getShifts().clear();
             doctor.getShifts().addAll(request.getShifts());
@@ -53,6 +53,4 @@ public class DoctorService {
 
         return doctorRepo.save(doctor);
     }
-
 }
-
