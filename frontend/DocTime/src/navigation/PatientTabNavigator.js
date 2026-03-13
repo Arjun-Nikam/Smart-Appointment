@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import DashboardScreen       from '../screens/patient/DashboardScreen';
 import BookAppointmentScreen from '../screens/patient/BookAppointmentScreen';
@@ -14,13 +15,15 @@ const Stack = createNativeStackNavigator();
 function DashboardStack() {
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="DashboardMain" component={DashboardScreen} />
+            <Stack.Screen name="DashboardMain"   component={DashboardScreen} />
             <Stack.Screen name="BookAppointment" component={BookAppointmentScreen} />
         </Stack.Navigator>
     );
 }
 
 export default function PatientTabNavigator() {
+    const insets = useSafeAreaInsets();
+
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
@@ -31,9 +34,14 @@ export default function PatientTabNavigator() {
                     backgroundColor: '#FFFFFF',
                     borderTopWidth: 1,
                     borderTopColor: '#F3F4F6',
-                    paddingBottom: 8,
+                    height: 60 + insets.bottom,
+                    paddingBottom: insets.bottom + 5,
                     paddingTop: 5,
-                    height: 65,
+                    elevation: 10,
+                },
+                tabBarLabelStyle: {
+                    fontSize: 12,
+                    fontWeight: '500',
                 },
                 tabBarIcon: ({ focused, color, size }) => {
                     let iconName;
@@ -41,10 +49,6 @@ export default function PatientTabNavigator() {
                     else if (route.name === 'Queue')   iconName = focused ? 'time'           : 'time-outline';
                     else if (route.name === 'History') iconName = focused ? 'calendar-clear' : 'calendar-clear-outline';
                     return <Ionicons name={iconName} size={24} color={color} />;
-                },
-                tabBarLabelStyle: {
-                    fontSize: 12,
-                    fontWeight: '500',
                 },
             })}
         >
