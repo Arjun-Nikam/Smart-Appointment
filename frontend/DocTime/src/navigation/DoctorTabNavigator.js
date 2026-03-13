@@ -18,8 +18,9 @@ export default function DoctorTabNavigator() {
                     backgroundColor: '#FFFFFF',
                     borderTopWidth: 1,
                     borderTopColor: '#F3F4F6',
-                    paddingBottom: 5,
-                    height: 60,
+                    paddingBottom: 20,
+                    paddingTop: 5,
+                    height: 80,
                 },
                 tabBarIcon: ({ focused, color, size }) => {
                     let iconName;
