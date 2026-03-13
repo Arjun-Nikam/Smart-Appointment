@@ -72,17 +72,27 @@ public class AppointmentService {
 
         LocalDateTime newSlotTime;
         if (lastSlotTime == null) {
-            // FIX #2: Filter to the CURRENTLY ACTIVE shift only
-            // Old code used !now.isBefore(startTime) which matched ANY past shift,
-            // e.g. 9 AM shift would wrongly anchor a 6 PM first-patient slot to 9:00
             LocalTime shiftStart = doctor.getShifts().stream()
                     .filter(s -> !now.isBefore(s.getStartTime()) && !now.isAfter(s.getEndTime()))
                     .map(Shift::getStartTime)
                     .min(Comparator.naturalOrder())
-                    .orElse(now); // fallback: use current time if no shift matched
+                    .orElse(now);
 
-            newSlotTime = LocalDate.now().atTime(shiftStart);
-        } else {
+            // Use the LATER of shift start OR current time
+            LocalTime effectiveStart = shiftStart.isBefore(now) ? now : shiftStart;
+            newSlotTime = LocalDate.now().atTime(effectiveStart);
+        }
+        else if (lastSlotTime.plusMinutes(doctor.getAverageConsultationTime())
+                .isBefore(LocalDateTime.now())) {
+            // ── FIX: Last slot + consultation time is already in the past
+            // This happens when test appointments were created at midnight
+            // Start fresh from NOW instead of piling onto stale slots
+            newSlotTime = LocalDateTime.now()
+                    .plusMinutes(doctor.getAverageConsultationTime());
+
+        }
+        else {
+            // Normal case — add after last slot
             newSlotTime = lastSlotTime.plusMinutes(doctor.getAverageConsultationTime());
         }
 

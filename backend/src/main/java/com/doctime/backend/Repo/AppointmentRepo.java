@@ -122,6 +122,13 @@ public interface AppointmentRepo extends JpaRepository<Appointment, Long> {
             @Param("today") LocalDate today
     );
 
+    // Mark all BOOKED or CHECKED_IN appointments from BEFORE today as NO_SHOW
+    @Modifying
+    @Query("UPDATE Appointment a SET a.status = 'NO_SHOW' " +
+            "WHERE a.status IN ('BOOKED', 'CHECKED_IN') " +
+            "AND CAST(a.appointmentTime AS date) < CURRENT_DATE")
+    int markExpiredAppointmentsNoShow();
+
 
 
     // Find patient's active appointment for today automatically
@@ -141,6 +148,18 @@ public interface AppointmentRepo extends JpaRepository<Appointment, Long> {
             "AND a.queuePosition < :myPosition " +
             "AND CAST(a.appointmentTime AS date) = :today")
     Long countPatientsAhead(
+            @Param("doctorId") Long doctorId,
+            @Param("myPosition") int myPosition,
+            @Param("today") LocalDate today
+    );
+
+    // Count only CHECKED_IN patients ahead — physically present only
+    @Query("SELECT COUNT(a) FROM Appointment a " +
+            "WHERE a.doctor.id = :doctorId " +
+            "AND a.status = 'CHECKED_IN' " +
+            "AND a.queuePosition < :myPosition " +
+            "AND CAST(a.appointmentTime AS date) = :today")
+    Long countCheckedInPatientsAhead(
             @Param("doctorId") Long doctorId,
             @Param("myPosition") int myPosition,
             @Param("today") LocalDate today
