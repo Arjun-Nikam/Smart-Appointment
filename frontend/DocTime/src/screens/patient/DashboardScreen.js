@@ -87,7 +87,26 @@ export default function DashboardScreen({ navigation }) {
         ]);
     };
 
-    const renderDoctorCard = ({ item }) => (
+    const renderDoctorCard = ({ item }) => {
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+
+    const isInShift = item.shifts && item.shifts.some(shift => {
+        const [startH, startM] = shift.startTime.split(':').map(Number);
+        const [endH,   endM]   = shift.endTime.split(':').map(Number);
+        const start = startH * 60 + startM;
+        const end   = endH   * 60 + endM;
+        return currentTime >= start && currentTime <= end;
+    });
+
+    const badgeText  = !item.available ? 'Unavailable'   :
+                        isInShift      ? 'Available Now' : 'Outside Hours';
+    const badgeBg    = !item.available ? '#FEE2E2'       :
+                        isInShift      ? '#DCFCE7'       : '#FEF3C7';
+    const badgeColor = !item.available ? '#DC2626'       :
+                        isInShift      ? '#16A34A'       : '#D97706';
+
+    return (
         <TouchableOpacity
             style={styles.doctorCard}
             onPress={() => navigation.navigate('BookAppointment', { doctor: item })}>
@@ -109,15 +128,9 @@ export default function DashboardScreen({ navigation }) {
                                 {item.averageConsultationTime} min
                             </Text>
                         </View>
-                        <View style={[
-                            styles.availableBadge,
-                            !item.available && styles.unavailableBadge
-                        ]}>
-                            <Text style={[
-                                styles.availableText,
-                                !item.available && styles.unavailableText
-                            ]}>
-                                {item.available ? 'Available' : 'Unavailable'}
+                        <View style={[styles.availableBadge, { backgroundColor: badgeBg }]}>
+                            <Text style={[styles.availableText, { color: badgeColor }]}>
+                                {badgeText}
                             </Text>
                         </View>
                     </View>
@@ -126,6 +139,7 @@ export default function DashboardScreen({ navigation }) {
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
         </TouchableOpacity>
     );
+};
 
     return (
         <View style={styles.container}>

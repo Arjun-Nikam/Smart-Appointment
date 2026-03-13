@@ -5,9 +5,11 @@ import {
     TouchableOpacity, Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axios';
 
 export default function LiveQueueScreen() {
+    const { logout } = useAuth();
     const [queue, setQueue]           = useState([]);
     const [loading, setLoading]       = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -28,6 +30,19 @@ export default function LiveQueueScreen() {
             setLoading(false);
             setRefreshing(false);
         }
+    };
+
+    const handleLogout = () => {
+        Alert.alert('Logout', 'Are you sure?', [
+            { text: 'Cancel', style: 'cancel' },
+            {
+                text: 'Logout', style: 'destructive',
+                onPress: async () => {
+                    try { await api.post('/api/auth/logout'); } catch (e) {}
+                    await logout();
+                }
+            }
+        ]);
     };
 
     const handleAction = (appointment, action) => {
@@ -72,7 +87,7 @@ export default function LiveQueueScreen() {
         }
     };
 
-    const renderItem = ({ item, index }) => {
+    const renderItem = ({ item }) => {
         const config = getStatusConfig(item.status);
         const time = new Date(item.appointmentTime).toLocaleTimeString([], {
             hour: '2-digit', minute: '2-digit'
@@ -80,7 +95,6 @@ export default function LiveQueueScreen() {
 
         return (
             <View style={styles.card}>
-                {/* Card Header */}
                 <View style={styles.cardHeader}>
                     <View style={styles.positionBadge}>
                         <Text style={styles.positionText}>#{item.queuePosition}</Text>
@@ -98,7 +112,6 @@ export default function LiveQueueScreen() {
                     </View>
                 </View>
 
-                {/* Time and late arrival */}
                 <View style={styles.timeRow}>
                     <Ionicons name="time-outline" size={14} color="#9CA3AF" />
                     <Text style={styles.timeText}>Slot: {time}</Text>
@@ -110,7 +123,6 @@ export default function LiveQueueScreen() {
                     )}
                 </View>
 
-                {/* Action Buttons */}
                 <View style={styles.actionsRow}>
                     {item.status === 'BOOKED' && (
                         <>
@@ -151,10 +163,15 @@ export default function LiveQueueScreen() {
         <View style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Live Queue</Text>
-                <Text style={styles.headerSubtitle}>
-                    {queue.length} patient{queue.length !== 1 ? 's' : ''} today
-                </Text>
+                <View>
+                    <Text style={styles.headerTitle}>Live Queue</Text>
+                    <Text style={styles.headerSubtitle}>
+                        {queue.length} patient{queue.length !== 1 ? 's' : ''} today
+                    </Text>
+                </View>
+                <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+                    <Ionicons name="log-out-outline" size={24} color="#FFFFFF" />
+                </TouchableOpacity>
             </View>
 
             {loading ? (
@@ -196,6 +213,9 @@ const styles = StyleSheet.create({
         paddingTop: 55,
         paddingBottom: 20,
         paddingHorizontal: 24,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         borderBottomLeftRadius: 24,
         borderBottomRightRadius: 24,
     },
@@ -208,6 +228,14 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: 'rgba(255,255,255,0.8)',
         marginTop: 2,
+    },
+    logoutButton: {
+        width: 40,
+        height: 40,
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     loader: {
         flex: 1,
