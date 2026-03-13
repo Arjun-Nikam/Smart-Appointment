@@ -9,6 +9,18 @@ import api from '../../api/axios';
 export default function BookAppointmentScreen({ route, navigation }) {
     const { doctor } = route.params;
     const [loading, setLoading] = useState(false);
+        const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+    const isInShift = doctor.shifts && doctor.shifts.some(shift => {
+        const [startH, startM] = shift.startTime.split(':').map(Number);
+        const [endH,   endM]   = shift.endTime.split(':').map(Number);
+        return currentTime >= (startH * 60 + startM) &&
+               currentTime <= (endH   * 60 + endM);
+    });
+    const statusText  = !doctor.available ? 'Unavailable'   :
+                         isInShift        ? 'Available Now' : 'Outside Hours';
+    const statusColor = !doctor.available ? '#DC2626'       :
+                         isInShift        ? '#16A34A'       : '#D97706';
 
     const handleBookAppointment = async () => {
         Alert.alert(
@@ -84,13 +96,10 @@ export default function BookAppointmentScreen({ route, navigation }) {
                         </View>
                         <View style={styles.detailItem}>
                             <Ionicons name="checkmark-circle-outline" size={20}
-                                color={doctor.available ? '#16A34A' : '#DC2626'} />
+                                color={statusColor} />
                             <Text style={styles.detailLabel}>Status</Text>
-                            <Text style={[
-                                styles.detailValue,
-                                { color: doctor.available ? '#16A34A' : '#DC2626' }
-                            ]}>
-                                {doctor.available ? 'Available' : 'Unavailable'}
+                            <Text style={[styles.detailValue, { color: statusColor }]}>
+                                {statusText}
                             </Text>
                         </View>
                     </View>
@@ -135,20 +144,20 @@ export default function BookAppointmentScreen({ route, navigation }) {
             <View style={styles.footer}>
                 <TouchableOpacity
                     style={[
-                        styles.bookButton,
-                        (!doctor.available || loading) && styles.bookButtonDisabled
-                    ]}
-                    onPress={handleBookAppointment}
-                    disabled={!doctor.available || loading}>
-                    {loading
-                        ? <ActivityIndicator color="#FFFFFF" />
-                        : <>
-                            <Ionicons name="calendar" size={20} color="#FFFFFF" />
-                            <Text style={styles.bookButtonText}>
-                                {doctor.available ? 'Book Appointment' : 'Doctor Unavailable'}
-                            </Text>
-                          </>
-                    }
+                    styles.bookButton,
+                    (!isInShift || !doctor.available || loading) && styles.bookButtonDisabled
+                ]}
+                onPress={handleBookAppointment}
+                disabled={!isInShift || !doctor.available || loading}>
+                {loading
+                    ? <ActivityIndicator color="#FFFFFF" />
+                    : <>
+                        <Ionicons name="calendar" size={20} color="#FFFFFF" />
+                        <Text style={styles.bookButtonText}>
+                            {isInShift && doctor.available ? 'Book Appointment' : statusText}
+                        </Text>
+                    </>
+                }
                 </TouchableOpacity>
             </View>
         </View>
