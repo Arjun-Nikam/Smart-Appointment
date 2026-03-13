@@ -65,7 +65,7 @@ public class QueueService {
     }
 
     // 4. Mark No Show (Doctor)
-    private static final int GRACE_PERIOD_MINUTES = 0; // Configurable
+    private static final int GRACE_PERIOD_MINUTES = 10; // Configurable
 
     @Transactional
     public Appointment markNoShow(Long appointmentId, String loggedInDoctorEmail) {
@@ -187,18 +187,15 @@ public class QueueService {
     // 5. Patient Views Their Queue Position (Patient)
     // FIX #1: Added missing method — no appointmentId needed, resolved from token
     public Map<String, Object> getPatientQueuePosition(String patientEmail) {
-
-        // Find patient from their JWT email
         Patient patient = patientRepo.findByEmail(patientEmail)
                 .orElseThrow(() -> new RuntimeException("Patient not found."));
 
-        // Find their active appointment for today automatically
         Appointment appt = appointmentRepo.findActiveAppointmentForPatientToday(
                 patient.getId(), LocalDate.now()
         ).orElseThrow(() -> new RuntimeException("You have no active appointment today."));
 
-        // Count how many patients are ahead in the queue
-        long patientsAhead = appointmentRepo.countPatientsAhead(
+        // ✅ CHANGED: only counts physically present patients
+        long patientsAhead = appointmentRepo.countCheckedInPatientsAhead(
                 appt.getDoctor().getId(),
                 appt.getQueuePosition(),
                 LocalDate.now()
