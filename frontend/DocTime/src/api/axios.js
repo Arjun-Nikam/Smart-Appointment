@@ -3,12 +3,14 @@ import * as SecureStore from 'expo-secure-store';
 
 // Your Spring Boot backend URL
 // Change this to your deployed URL when going to production
-const BASE_URL = 'http://192.168.7.30:8080'; // ← Replace with your IP
+const BASE_URL = 'https://forty-bikes-retire.loca.lt'; // ← Replace with your IP
+
 
 const api = axios.create({
     baseURL: BASE_URL,
     headers: {
         'Content-Type': 'application/json',
+        'bypass-tunnel-reminder': 'true',
     },
 });
 

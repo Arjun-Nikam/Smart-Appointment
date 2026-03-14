@@ -7,6 +7,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axios';
+import * as Location from 'expo-location';
 
 export default function DashboardScreen({ navigation }) {
     const { user, logout } = useAuth();
@@ -17,6 +18,7 @@ export default function DashboardScreen({ navigation }) {
     const [refreshing, setRefreshing]   = useState(false);
     const [searchText, setSearchText]   = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [nearbyMode, setNearbyMode] = useState(false);
 
     useEffect(() => {
         fetchData();
@@ -31,8 +33,10 @@ export default function DashboardScreen({ navigation }) {
             setDoctors(doctorsRes.data);
             setCategories(['All', ...categoriesRes.data]);
         } catch (error) {
+            console.log('Search error full:', JSON.stringify(error));
             Alert.alert('Error', 'Failed to load doctors.');
-        } finally {
+        }
+        finally {
             setLoading(false);
             setRefreshing(false);
         }
@@ -69,6 +73,31 @@ export default function DashboardScreen({ navigation }) {
             setDoctors(res.data);
         } catch (error) {
             console.log('Filter error:', error);
+        }
+    };
+    const handleNearby = async () => {
+        if (nearbyMode) {
+            setNearbyMode(false);
+            fetchData();
+            return;
+        }
+        try {
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission Denied',
+                    'Location permission is needed to find nearby doctors.');
+                return;
+            }
+            const location = await Location.getCurrentPositionAsync({});
+            const { latitude, longitude } = location.coords;
+            const res = await api.get(
+                `/api/dashboard/nearby?lat=${latitude}&lng=${longitude}`
+            );
+            setDoctors(res.data);
+            setNearbyMode(true);
+            setSelectedCategory('All');
+        } catch (error) {
+            Alert.alert('Error', 'Could not fetch nearby doctors.');
         }
     };
 
@@ -173,6 +202,22 @@ export default function DashboardScreen({ navigation }) {
                     </TouchableOpacity>
                 )}
             </View>
+            {/* Nearby Button */}
+            <TouchableOpacity
+                style={[styles.nearbyButton, nearbyMode && styles.nearbyButtonActive]}
+                onPress={handleNearby}>
+                <Ionicons
+                    name="location"
+                    size={16}
+                    color={nearbyMode ? '#FFFFFF' : '#2563EB'}
+                />
+                <Text style={[
+                    styles.nearbyButtonText,
+                    nearbyMode && styles.nearbyButtonTextActive
+                ]}>
+                    {nearbyMode ? 'Nearby ✓' : 'Nearby'}
+                </Text>
+            </TouchableOpacity>
 
             {/* Categories */}
             <ScrollView
@@ -275,6 +320,31 @@ const styles = StyleSheet.create({
     },
     searchIcon: {
         marginRight: 10,
+    },
+    nearbyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EFF6FF',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginHorizontal: 24,
+    marginBottom: 12,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+    },
+    nearbyButtonActive: {
+        backgroundColor: '#2563EB',
+        borderColor: '#2563EB',
+    },
+    nearbyButtonText: {
+        fontSize: 13,
+        color: '#2563EB',
+        fontWeight: '600',
+    },
+    nearbyButtonTextActive: {
+        color: '#FFFFFF',
     },
     searchInput: {
         flex: 1,
