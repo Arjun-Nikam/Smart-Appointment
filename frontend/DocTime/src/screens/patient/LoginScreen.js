@@ -30,9 +30,15 @@ export default function LoginScreen({ navigation }) {
             name: userProfile.name,
             email: userProfile.email
         });
-    } catch (error) {
-        Alert.alert('Error', error.response?.data || 'Invalid credentials.');
-    } finally {
+    } 
+    catch (error) {
+    console.log('Login error:', JSON.stringify(error.response?.data));
+    const msg = typeof error.response?.data === 'string' 
+        ? error.response.data 
+        : JSON.stringify(error.response?.data) || 'Login failed.';
+        Alert.alert('Error', msg);
+    }
+    finally {
         setLoading(false);
     }
 };
