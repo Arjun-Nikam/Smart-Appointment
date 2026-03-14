@@ -5,6 +5,7 @@ import com.doctime.backend.Dto.AuthResponse;
 import com.doctime.backend.Entity.Admin;
 import com.doctime.backend.Entity.Doctor;
 import com.doctime.backend.Entity.Patient;
+import com.doctime.backend.Enum.DoctorStatus;
 import com.doctime.backend.Repo.AdminRepo;
 import com.doctime.backend.Repo.DoctorRepo;
 import com.doctime.backend.Repo.PatientRepo;
@@ -43,6 +44,7 @@ public class AuthService {
             throw new RuntimeException("Email is already registered.");
         }
         doctor.setPassword(passwordEncoder.encode(doctor.getPassword()));
+        doctor.setStatus(DoctorStatus.PENDING);
         return doctorRepo.save(doctor);
     }
 
@@ -66,14 +68,20 @@ public class AuthService {
         Optional<Doctor> doctor = doctorRepo.findByEmail(email);
         if (doctor.isPresent()) {
             if (passwordEncoder.matches(rawPassword, doctor.get().getPassword())) {
+                // ── ADD THESE CHECKS ──
+                if (doctor.get().getStatus() == DoctorStatus.PENDING) {
+                    throw new RuntimeException("Your account is pending admin approval.");
+                }
+                if (doctor.get().getStatus() == DoctorStatus.REJECTED) {
+                    throw new RuntimeException("Your account has been rejected. Contact support.");
+                }
+                // ─────────────────────
                 String token = jwtUtil.generateToken(email, "DOCTOR", doctor.get().getId());
                 return new AuthResponse(token, "DOCTOR", doctor.get());
             } else {
                 throw new RuntimeException("Invalid credentials.");
             }
-        }
-
-        throw new RuntimeException("Invalid credentials.");
+        }throw new RuntimeException("Invalid credentials.");
     }
 
     // ─────────────────────────────────────────────

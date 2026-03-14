@@ -1,6 +1,7 @@
 package com.doctime.backend.Repo;
 
 import com.doctime.backend.Entity.Doctor;
+import com.doctime.backend.Enum.DoctorStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -47,4 +48,6 @@ public interface DoctorRepo extends JpaRepository<Doctor, Long> {
     @Query("SELECT d FROM Doctor d WHERE d.id = :id")
     Optional<Doctor> findByIdWithLock(@Param("id") Long id);
     // ───────────────────────────────────────────────────────────────────────
+
+    List<Doctor> findByStatus(DoctorStatus status);
 }

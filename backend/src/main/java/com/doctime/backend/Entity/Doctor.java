@@ -1,5 +1,6 @@
 package com.doctime.backend.Entity;
 
+import com.doctime.backend.Enum.DoctorStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -51,7 +52,13 @@ public class Doctor {
     @CollectionTable(name = "doctor_shifts", joinColumns = @JoinColumn(name = "doctor_id"))
     private List<Shift> shifts = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private DoctorStatus status = DoctorStatus.PENDING;
 
+
+    public DoctorStatus getStatus() { return status; }
+    public void setStatus(DoctorStatus status) { this.status = status; }
 
     public List<Shift> getShifts() { return shifts; }
     public void setShifts(List<Shift> shifts) { this.shifts = shifts; }
