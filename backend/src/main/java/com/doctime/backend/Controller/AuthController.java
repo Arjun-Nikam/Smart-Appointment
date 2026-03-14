@@ -56,10 +56,8 @@ public class AuthController {
     // Header: Authorization: Bearer <ADMIN token>
     // ─────────────────────────────────────────────
     // FIX: Removed Admin-Key header — now requires a real ADMIN JWT
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/doctor/signup")
-    public ResponseEntity<?> registerDoctor(
-            @Valid @RequestBody DoctorSignupRequest request) {
+    public ResponseEntity<?> doctorSignup(@RequestBody DoctorSignupRequest request){
         try {
             Doctor doctor = new Doctor();
             doctor.setName(request.getName());
