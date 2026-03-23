@@ -6,19 +6,18 @@ import { ActivityIndicator, View } from 'react-native';
 // Auth Screens
 import LoginScreen from '../screens/patient/LoginScreen';
 import SignupScreen from '../screens/patient/SignupScreen';
+import DoctorSignupScreen from '../screens/doctor/DoctorSignupScreen';
 
-// Patient Screens
+// Navigators
 import PatientTabNavigator from './PatientTabNavigator';
-
-// Doctor Screens
 import DoctorTabNavigator from './DoctorTabNavigator';
+import AdminTabNavigator from './AdminTabNavigator';
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
-    const { isLoggedIn, isPatient, isDoctor, loading } = useAuth();
+    const { isLoggedIn, isPatient, isDoctor, isAdmin, loading } = useAuth();
 
-    // Show spinner while loading saved token
     if (loading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -30,17 +29,17 @@ export default function AppNavigator() {
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             {!isLoggedIn ? (
-                // Not logged in — show auth screens
                 <>
-                    <Stack.Screen name="Login"  component={LoginScreen} />
-                    <Stack.Screen name="Signup" component={SignupScreen} />
+                    <Stack.Screen name="Login"        component={LoginScreen} />
+                    <Stack.Screen name="Signup"       component={SignupScreen} />
+                    <Stack.Screen name="DoctorSignup" component={DoctorSignupScreen} />
                 </>
             ) : isPatient ? (
-                // Logged in as patient
                 <Stack.Screen name="PatientHome" component={PatientTabNavigator} />
             ) : isDoctor ? (
-                // Logged in as doctor
-                <Stack.Screen name="DoctorHome" component={DoctorTabNavigator} />
+                <Stack.Screen name="DoctorHome"  component={DoctorTabNavigator} />
+            ) : isAdmin ? (
+                <Stack.Screen name="AdminHome"   component={AdminTabNavigator} />
             ) : null}
         </Stack.Navigator>
     );

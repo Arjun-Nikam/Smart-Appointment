@@ -115,6 +115,14 @@ export default function LoginScreen({ navigation }) {
                             <Text style={styles.signupLink}>Sign Up</Text>
                         </TouchableOpacity>
                     </View>
+
+                    {/* Doctor Signup Link */}
+                    <View style={styles.signupRow}>
+                        <Text style={styles.signupText}>Are you a doctor? </Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('DoctorSignup')}>
+                            <Text style={styles.signupLink}>Register Here</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
