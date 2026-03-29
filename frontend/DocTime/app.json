@@ -4,7 +4,7 @@
     "slug": "DocTime",
     "version": "1.0.0",
     "updates": {
-    "enabled": false
+      "enabled": false
     },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -24,7 +24,8 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "package": "com.arjun_nikam.DocTime"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -32,6 +33,11 @@
     "plugins": [
       "expo-secure-store",
       "react-native-edge-to-edge"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "e1344309-c27f-4527-b524-445a6660372f"
+      }
+    }
   }
 }

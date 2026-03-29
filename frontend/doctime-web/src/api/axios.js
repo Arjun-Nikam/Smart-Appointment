@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://your-cloudflared-url.trycloudflare.com';
+const BASE_URL = ' https://sciences-automated-many-composite.trycloudflare.com';
 
 const api = axios.create({
     baseURL: BASE_URL,

@@ -11,6 +11,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import AndroidIcon from '@mui/icons-material/Android';
 
 const DRAWER_WIDTH = 260;
 
@@ -19,6 +20,7 @@ const navItems = [
     { label: 'Pending Doctors', path: '/pending',   icon: <PendingIcon /> },
     { label: 'All Doctors',     path: '/doctors',   icon: <PeopleIcon /> },
     { label: 'All Patients',    path: '/patients',  icon: <PersonIcon /> },
+    { label: 'Download App',    path: '/download',  icon: <AndroidIcon /> },
 ];
 
 export default function Sidebar() {

@@ -6,10 +6,11 @@ import DashboardPage from './pages/DashboardPage';
 import PendingDoctorsPage from './pages/PendingDoctorsPage';
 import AllDoctorsPage from './pages/AllDoctorsPage';
 import AllPatientsPage from './pages/AllPatientsPage';
+import DownloadPage from './pages/DownloadPage';
 
 function ProtectedRoute({ children }) {
     const { isLoggedIn, isAdmin } = useAuth();
-    if (!isLoggedIn || !isAdmin) return <Navigate to="/" />;
+    if (!isLoggedIn || !isAdmin) return <Navigate to="/admin" />;
     return children;
 }
 
@@ -18,7 +19,8 @@ export default function App() {
         <AuthProvider>
             <BrowserRouter>
                 <Routes>
-                    <Route path="/" element={<LoginPage />} />
+                    <Route path="/"         element={<DownloadPage />} />
+                    <Route path="/admin"    element={<LoginPage />} />
                     <Route path="/dashboard" element={
                         <ProtectedRoute><DashboardPage /></ProtectedRoute>
                     } />
