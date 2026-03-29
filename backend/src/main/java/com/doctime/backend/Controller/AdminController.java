@@ -3,6 +3,7 @@ package com.doctime.backend.Controller;
 import com.doctime.backend.Entity.Doctor;
 import com.doctime.backend.Enum.DoctorStatus;
 import com.doctime.backend.Repo.DoctorRepo;
+import com.doctime.backend.Repo.PatientRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
 
     @Autowired private DoctorRepo doctorRepo;
+    @Autowired private PatientRepo patientRepo;
 
     @GetMapping("/pending-doctors")
     public ResponseEntity<?> getPendingDoctors() {
@@ -25,6 +27,12 @@ public class AdminController {
     @GetMapping("/all-doctors")
     public ResponseEntity<?> getAllDoctors() {
         return ResponseEntity.ok(doctorRepo.findAll());
+    }
+
+
+    @GetMapping("/all-patients")
+    public ResponseEntity<?> getAllPatients() {
+        return ResponseEntity.ok(patientRepo.findAll());
     }
 
     @PutMapping("/approve/{doctorId}")
