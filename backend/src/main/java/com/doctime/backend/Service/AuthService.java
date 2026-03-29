@@ -81,7 +81,17 @@ public class AuthService {
             } else {
                 throw new RuntimeException("Invalid credentials.");
             }
-        }throw new RuntimeException("Invalid credentials.");
+        }
+        Optional<Admin> admin = adminRepo.findByEmail(email);
+        if (admin.isPresent()) {
+            if (passwordEncoder.matches(rawPassword, admin.get().getPassword())) {
+                String token = jwtUtil.generateToken(email, "ADMIN", admin.get().getId());
+                return new AuthResponse(token, "ADMIN", admin.get());
+            } else {
+                throw new RuntimeException("Invalid credentials.");
+            }
+        }
+        throw new RuntimeException("Invalid credentials.");
     }
 
     // ─────────────────────────────────────────────
