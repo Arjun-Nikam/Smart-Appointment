@@ -19,18 +19,18 @@ export default function App() {
         <AuthProvider>
             <BrowserRouter>
                 <Routes>
-                    <Route path="/"          element={<DownloadPage />} />
-                    <Route path="/admin"     element={<LoginPage />} />
+                    <Route path="/"         element={<DownloadPage />} />
+                    <Route path="/admin"    element={<LoginPage />} />
                     <Route path="/dashboard" element={
                         <ProtectedRoute><DashboardPage /></ProtectedRoute>
                     } />
-                    <Route path="/pending"   element={
+                    <Route path="/pending" element={
                         <ProtectedRoute><PendingDoctorsPage /></ProtectedRoute>
                     } />
-                    <Route path="/doctors"   element={
+                    <Route path="/doctors" element={
                         <ProtectedRoute><AllDoctorsPage /></ProtectedRoute>
                     } />
-                    <Route path="/patients"  element={
+                    <Route path="/patients" element={
                         <ProtectedRoute><AllPatientsPage /></ProtectedRoute>
                     } />
                 </Routes>

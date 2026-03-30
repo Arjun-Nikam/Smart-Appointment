@@ -7,7 +7,7 @@ import AppleIcon from '@mui/icons-material/Apple';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-const ANDROID_APK_LINK = 'https://drive.google.com/file/d/15__iAs6UzrPEC_-bikky-dR_RmGnHEKM/view?usp=sharing';
+const ANDROID_APK_LINK = 'https://drive.google.com/uc?export=download&id=15__iAs6UzrPEC_-bikky-dR_RmGnHEKM&confirm=t';
 
 const features = [
     'Book doctor appointments instantly',
@@ -76,7 +76,6 @@ export default function DownloadPage() {
                     fullWidth variant="contained" size="large"
                     startIcon={<AndroidIcon />}
                     href={ANDROID_APK_LINK}
-                    target="_blank"
                     sx={{
                         backgroundColor: '#16A34A',
                         borderRadius: 3, py: 2, fontSize: 16,
