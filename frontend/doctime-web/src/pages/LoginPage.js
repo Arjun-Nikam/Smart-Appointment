@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
@@ -16,6 +16,10 @@ export default function LoginPage() {
     const [password, setPassword] = useState('');
     const [loading, setLoading]   = useState(false);
     const [error, setError]       = useState('');
+
+    useEffect(() => {
+        document.title = 'DocTime Admin';
+    }, []);
 
     const handleLogin = async () => {
         if (!email || !password) {
@@ -50,8 +54,6 @@ export default function LoginPage() {
         }}>
             <Card sx={{ width: 420, borderRadius: 4, boxShadow: 6 }}>
                 <CardContent sx={{ p: 5 }}>
-
-                    {/* Logo */}
                     <Box sx={{ textAlign: 'center', mb: 4 }}>
                         <Box sx={{
                             width: 70, height: 70,

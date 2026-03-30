@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = ' https://sciences-automated-many-composite.trycloudflare.com';
+const BASE_URL = 'https://smart-appointment-production-3236.up.railway.app';
 
 const api = axios.create({
     baseURL: BASE_URL,

@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 
 // Your Spring Boot backend URL
 // Change this to your deployed URL when going to production
-const BASE_URL = 'https://sciences-automated-many-composite.trycloudflare.com'; // ← Replace with your IP
+const BASE_URL = 'https://smart-appointment-production-3236.up.railway.app'; // ← Replace with your IP
 
 
 const api = axios.create({

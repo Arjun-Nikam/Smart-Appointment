@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
-    Box, Typography, Button, Card, CardContent, Chip
+    Box, Typography, Button, Card, CardContent
 } from '@mui/material';
 import AndroidIcon from '@mui/icons-material/Android';
 import AppleIcon from '@mui/icons-material/Apple';
@@ -18,6 +18,10 @@ const features = [
 ];
 
 export default function DownloadPage() {
+    useEffect(() => {
+        document.title = 'DocTime - Download App';
+    }, []);
+
     return (
         <Box sx={{
             minHeight: '100vh',
@@ -28,7 +32,6 @@ export default function DownloadPage() {
             justifyContent: 'center',
             p: 3,
         }}>
-            {/* Header */}
             <Box sx={{ textAlign: 'center', mb: 5 }}>
                 <Box sx={{
                     width: 80, height: 80,
@@ -49,7 +52,6 @@ export default function DownloadPage() {
                 </Typography>
             </Box>
 
-            {/* Features */}
             <Card sx={{ borderRadius: 3, boxShadow: 2, mb: 4, maxWidth: 500, width: '100%' }}>
                 <CardContent sx={{ p: 3 }}>
                     <Typography fontWeight={600} fontSize={18} mb={2}>
@@ -69,39 +71,24 @@ export default function DownloadPage() {
                 </CardContent>
             </Card>
 
-            {/* Download Buttons */}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%', maxWidth: 500 }}>
-
-                {/* Android */}
                 <Button
-                    fullWidth
-                    variant="contained"
-                    size="large"
+                    fullWidth variant="contained" size="large"
                     startIcon={<AndroidIcon />}
                     href={ANDROID_APK_LINK}
                     sx={{
                         backgroundColor: '#16A34A',
-                        borderRadius: 3,
-                        py: 2,
-                        fontSize: 16,
+                        borderRadius: 3, py: 2, fontSize: 16,
                         '&:hover': { backgroundColor: '#15803D' },
                     }}>
                     Download for Android
                 </Button>
-
-                {/* iOS */}
                 <Button
-                    fullWidth
-                    variant="outlined"
-                    size="large"
-                    startIcon={<AppleIcon />}
-                    disabled
+                    fullWidth variant="outlined" size="large"
+                    startIcon={<AppleIcon />} disabled
                     sx={{
-                        borderRadius: 3,
-                        py: 2,
-                        fontSize: 16,
-                        borderColor: '#9CA3AF',
-                        color: '#9CA3AF',
+                        borderRadius: 3, py: 2, fontSize: 16,
+                        borderColor: '#9CA3AF', color: '#9CA3AF',
                     }}>
                     iOS — Coming Soon
                 </Button>
