@@ -2,6 +2,7 @@ package com.doctime.backend.Service;
 
 import com.doctime.backend.Dto.ScheduleUpdateRequest;
 import com.doctime.backend.Entity.Doctor;
+import com.doctime.backend.Enum.DoctorStatus;
 import com.doctime.backend.Repo.DoctorRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,15 +16,15 @@ public class DoctorService {
     private DoctorRepo doctorRepo;
 
     public List<Doctor> getAllDoctors() {
-        return doctorRepo.findAll();
+        return doctorRepo.findByStatus(DoctorStatus.APPROVED);
     }
 
     public List<Doctor> getDoctorsBySpecialty(String specialty) {
-        return doctorRepo.findBySpecializationIgnoreCase(specialty);
+        return doctorRepo.findBySpecializationIgnoreCase(specialty, DoctorStatus.APPROVED);
     }
 
     public List<Doctor> searchDoctorByName(String name) {
-        return doctorRepo.findByNameContainingIgnoreCase(name);
+        return doctorRepo.findByNameContainingIgnoreCase(name, DoctorStatus.APPROVED);
     }
 
     public List<String> getAllCategories() {
@@ -35,7 +36,7 @@ public class DoctorService {
     }
 
     public List<Doctor> searchByHospitalName(String name) {
-        return doctorRepo.findByHospitalNameContainingIgnoreCase(name);
+        return doctorRepo.findByHospitalNameContainingIgnoreCase(name, DoctorStatus.APPROVED);
     }
 
     // FIX #5: Takes email from token — not doctorId from URL

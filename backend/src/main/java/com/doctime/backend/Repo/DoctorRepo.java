@@ -19,16 +19,20 @@ public interface DoctorRepo extends JpaRepository<Doctor, Long> {
     Optional<Doctor> findByEmail(String email);
 
     // For Patient Search: Find doctors by exactly matching the specialty
-    List<Doctor> findBySpecializationIgnoreCase(String specialization);
+    List<Doctor> findBySpecializationIgnoreCase(String specialization, DoctorStatus status);
 
     // For Patient Search: If they type "sha", it finds "Dr. Sharma"
-    List<Doctor> findByNameContainingIgnoreCase(String name);
+    List<Doctor> findByNameContainingIgnoreCase(String name, DoctorStatus status);
 
     @Query("SELECT DISTINCT d.specialization FROM Doctor d")
     List<String> findAllSpecializations();
 
     // Get Nearest Doctors: Haversine formula sorted by distance in KM
     @Query(value = "SELECT * FROM doctors " +
+            "WHERE is_approved = true " +          // ✅ Admin must have approved the doctor
+            "AND is_active = true " +              // ✅ Account is not deactivated/banned
+            "AND is_available = true " +           // ✅ Doctor is currently accepting patients
+            "AND is_verified = true " +            // ✅ Credentials are verified
             "ORDER BY (6371 * acos(cos(radians(:userLat)) * cos(radians(latitude)) * " +
             "cos(radians(longitude) - radians(:userLng)) + " +
             "sin(radians(:userLat)) * sin(radians(latitude)))) ASC",
@@ -39,7 +43,7 @@ public interface DoctorRepo extends JpaRepository<Doctor, Long> {
     );
 
     // Search doctors by hospital name (case-insensitive, partial match)
-    List<Doctor> findByHospitalNameContainingIgnoreCase(String hospitalName);
+    List<Doctor> findByHospitalNameContainingIgnoreCase(String hospitalName, DoctorStatus status);
 
     // ── ADDED ──────────────────────────────────────────────────────────────
     // Pessimistic write lock — used during appointment booking to prevent
