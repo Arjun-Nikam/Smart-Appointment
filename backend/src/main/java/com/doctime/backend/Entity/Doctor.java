@@ -48,7 +48,7 @@ public class Doctor {
     private LocalTime shiftStart;
     private LocalTime shiftEnd;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "doctor_shifts", joinColumns = @JoinColumn(name = "doctor_id"))
     private List<Shift> shifts = new ArrayList<>();
 
