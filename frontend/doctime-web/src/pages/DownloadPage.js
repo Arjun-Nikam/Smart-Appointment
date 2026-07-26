@@ -7,7 +7,7 @@ import AppleIcon from '@mui/icons-material/Apple';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-const ANDROID_APK_LINK = 'https://drive.google.com/file/d/1A8UCGmn_bugB4F7Ly9KSg4YF1Q959T0q/view?usp=sharing';
+const ANDROID_APK_LINK = 'https://drive.google.com/file/d/1WAx-XritLJNAfUsVCn8XJYcyG_Ke8liV/view?usp=sharing';
 
 const features = [
     'Book doctor appointments instantly',
