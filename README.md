@@ -11,7 +11,6 @@ DocTime is a full-stack healthcare appointment management system designed to eli
 | Service | URL |
 |---------|-----|
 | 📱 Download App | https://splendid-crumble-61554f.netlify.app |
-| 🌐 Admin Panel | https://splendid-crumble-61554f.netlify.app/admin |
 | ⚙️ Backend API | https://smart-appointment-oq6h.onrender.com |
 
 ---
