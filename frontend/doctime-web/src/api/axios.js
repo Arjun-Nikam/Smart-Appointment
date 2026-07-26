@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://smart-appointment-production-3236.up.railway.app';
+const BASE_URL = 'https://smart-appointment-oq6h.onrender.com';
 
 const api = axios.create({
     baseURL: BASE_URL,
